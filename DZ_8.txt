@@ -1,0 +1,37 @@
+import xml.etree.ElementTree as ET
+import json
+
+def add_words_to_dict(text, dct):
+    for word in text.split(' '):
+        if len(word) <= 6:
+            continue
+        word = word.lower()
+        dct[word] = dct.get(word, 0) + 1
+
+def print_top_10(texts):
+    dct = {}
+    for text in texts:
+        add_words_to_dict(text, dct)
+    lst = [(v, k) for k, v in dct.items()]
+    lst.sort(reverse=True)
+    for i, pair in enumerate(lst[:10]):
+        print(f'{i+1}. {pair[1]} - {pair[0]}')
+    
+def print_top_xml(filename):
+    tree = ET.parse(filename)
+    desc_lst = tree.findall('channel/item/description')
+    texts_lst = [desc.text for desc in desc_lst]
+    print_top_10(texts_lst)
+
+def print_top_json(filename):
+    with open(filename, "r", encoding="utf-8") as fh:
+        data_dct = json.load(fh)
+    items = data_dct["rss"]["channel"]["items"]
+    texts_lst = [item["description"] for item in items]
+    print_top_10(texts_lst)
+
+print('Топ-10 слов из xml')
+print_top_xml('newsafr.xml')
+print()
+print('Топ-10 слов из json')
+print_top_json('newsafr.json')
